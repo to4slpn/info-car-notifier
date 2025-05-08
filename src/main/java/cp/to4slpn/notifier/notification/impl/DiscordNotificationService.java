@@ -5,12 +5,12 @@ import okhttp3.*;
 
 import java.io.IOException;
 
-public final class DiscordNotificationServiceImpl implements NotificationService {
+public final class DiscordNotificationService implements NotificationService {
     private static final MediaType JSON = MediaType.get("application/json");
     private final OkHttpClient httpClient;
     private final String webhookUrl;
 
-    public DiscordNotificationServiceImpl(OkHttpClient httpClient, String webhookUrl) {
+    public DiscordNotificationService(OkHttpClient httpClient, String webhookUrl) {
         this.httpClient = httpClient;
         this.webhookUrl = webhookUrl;
     }
