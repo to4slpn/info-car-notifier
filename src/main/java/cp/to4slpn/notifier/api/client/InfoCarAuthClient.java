@@ -128,7 +128,7 @@ public final class InfoCarAuthClient {
         if (accessToken == null || (tokenExpiry != null && Instant.now().isAfter(tokenExpiry))) {
             try {
                 refreshToken();
-            } catch (IOException e) {
+            } catch (IOException | AuthException e) {
                 throw new AuthException("Token refresh failed", e);
             }
         }

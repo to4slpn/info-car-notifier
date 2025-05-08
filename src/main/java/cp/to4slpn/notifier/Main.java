@@ -1,7 +1,9 @@
 package cp.to4slpn.notifier;
 
 import cp.to4slpn.notifier.api.client.InfoCarAuthClient;
+import cp.to4slpn.notifier.api.client.InfoCarClient;
 import cp.to4slpn.notifier.api.exception.AuthException;
+import cp.to4slpn.notifier.api.model.ExamScheduleResponse;
 import cp.to4slpn.notifier.config.Config;
 import cp.to4slpn.notifier.config.ConfigLoader;
 import okhttp3.JavaNetCookieJar;
@@ -37,6 +39,35 @@ public final class Main {
             );
 
             authClient.login();
+
+            InfoCarClient infoCarClient = new InfoCarClient(httpClient, authClient);
+            ExamScheduleResponse schedule = infoCarClient.fetchExamSchedule(
+                    config.exam().startDate(),
+                    config.exam().endDate(),
+                    config.exam().category(),
+                    config.exam().wordId()
+            );
+
+            String examType = config.exam().examType();
+
+            System.out.println("Found exam slots:");
+            schedule.schedule().scheduledDays().forEach(day -> {
+                System.out.println("\nDate: " + day.date());
+
+                day.hours().forEach(hour -> {
+                    if ("practice".equalsIgnoreCase(examType) || "both".equalsIgnoreCase(examType)) {
+                        hour.practiceExams().forEach(exam -> {
+                            System.out.printf("  - [Practice] Time: %s, ID: %s%n", hour.time(), exam.id());
+                        });
+                    }
+                    if ("theory".equalsIgnoreCase(examType) || "both".equalsIgnoreCase(examType)) {
+                        hour.theoryExams().forEach(exam -> {
+                            System.out.printf("  - [Theory]   Time: %s, ID: %s%n", hour.time(), exam.id());
+                        });
+                    }
+                });
+            });
+
         } catch (AuthException e) {
             System.err.println("Authentication failed: " + e.getMessage());
         } catch (Exception e) {

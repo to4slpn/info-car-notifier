@@ -4,3 +4,11 @@ credentials:
 
 monitoring:
   timeout: PT30S  # 30 second timeout for requests
+
+exam:
+  category: "B"
+  wordId: "43" # Gdansk
+  checkInterval: PT5S
+  startDate: "2025-05-08"
+  endDate: "2025-05-31"
+  examType: "practice"  # options: practice, theory, both
