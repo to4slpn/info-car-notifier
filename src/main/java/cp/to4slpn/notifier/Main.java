@@ -3,9 +3,11 @@ package cp.to4slpn.notifier;
 import cp.to4slpn.notifier.api.client.InfoCarAuthClient;
 import cp.to4slpn.notifier.api.client.InfoCarClient;
 import cp.to4slpn.notifier.api.exception.AuthException;
-import cp.to4slpn.notifier.api.model.ExamScheduleResponse;
 import cp.to4slpn.notifier.config.Config;
 import cp.to4slpn.notifier.config.ConfigLoader;
+import cp.to4slpn.notifier.monitor.ExamMonitor;
+import cp.to4slpn.notifier.notification.NotificationService;
+import cp.to4slpn.notifier.notification.impl.NotificationServiceImpl;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 
@@ -24,50 +26,42 @@ public final class Main {
 
             Config config = ConfigLoader.loadConfig(configStream);
 
-            // setup http client
+            // setup httpclient
             OkHttpClient httpClient = new OkHttpClient.Builder()
                     .cookieJar(new JavaNetCookieJar(new CookieManager()))
                     .connectTimeout(config.monitoring().timeout())
                     .callTimeout(config.monitoring().timeout())
                     .build();
 
-            // initialize services
+            // authenticate with infocar
             InfoCarAuthClient authClient = new InfoCarAuthClient(
                     httpClient,
                     config.credentials().username(),
                     config.credentials().password()
             );
 
+            // perform login and establish session
             authClient.login();
 
+            // initialize infocar api client with the authenticated session
             InfoCarClient infoCarClient = new InfoCarClient(httpClient, authClient);
-            ExamScheduleResponse schedule = infoCarClient.fetchExamSchedule(
+
+            // initialize notification service
+            NotificationService notificationService = new NotificationServiceImpl();
+
+            // setup the exam monitoring logic
+            ExamMonitor monitor = new ExamMonitor(
+                    infoCarClient,
+                    notificationService,
+                    config.exam().examType(),
+                    config.exam().category(),
+                    config.exam().wordId(),
                     config.exam().startDate(),
                     config.exam().endDate(),
-                    config.exam().category(),
-                    config.exam().wordId()
+                    config.exam().checkInterval()
             );
 
-            String examType = config.exam().examType();
-
-            System.out.println("Found exam slots:");
-            schedule.schedule().scheduledDays().forEach(day -> {
-                System.out.println("\nDate: " + day.date());
-
-                day.hours().forEach(hour -> {
-                    if ("practice".equalsIgnoreCase(examType) || "both".equalsIgnoreCase(examType)) {
-                        hour.practiceExams().forEach(exam -> {
-                            System.out.printf("  - [Practice] Time: %s, ID: %s%n", hour.time(), exam.id());
-                        });
-                    }
-                    if ("theory".equalsIgnoreCase(examType) || "both".equalsIgnoreCase(examType)) {
-                        hour.theoryExams().forEach(exam -> {
-                            System.out.printf("  - [Theory]   Time: %s, ID: %s%n", hour.time(), exam.id());
-                        });
-                    }
-                });
-            });
-
+            monitor.start();
         } catch (AuthException e) {
             System.err.println("Authentication failed: " + e.getMessage());
         } catch (Exception e) {
