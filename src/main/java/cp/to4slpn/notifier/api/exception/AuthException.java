@@ -1,6 +1,6 @@
 package cp.to4slpn.notifier.api.exception;
 
-public class AuthException extends Exception {
+public final class AuthException extends Exception {
     public AuthException(String message) {
         super(message);
     }

@@ -1,0 +1,6 @@
+credentials:
+  username: "example@example.com"
+  password: "ExamplePassword123"
+
+monitoring:
+  timeout: PT30S  # 30 second timeout for requests
