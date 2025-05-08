@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+}
+
+group = 'cp.to4slpn'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
