@@ -3,7 +3,8 @@ package cp.to4slpn.notifier.config;
 import java.time.Duration;
 import java.time.LocalDate;
 
-public record Config(UserCredentials credentials, MonitoringConfig monitoring, ExamConfig exam) {
+public record Config(UserCredentials credentials, MonitoringConfig monitoring, ExamConfig exam,
+                     NotificationConfig notification) {
     public record UserCredentials(String username, String password) {
     }
 
@@ -12,5 +13,8 @@ public record Config(UserCredentials credentials, MonitoringConfig monitoring, E
 
     public record ExamConfig(String category, String wordId, Duration checkInterval, LocalDate startDate,
                              LocalDate endDate, String examType) {
+    }
+
+    public record NotificationConfig(boolean discord, String webhookUrl) {
     }
 }

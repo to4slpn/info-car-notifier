@@ -7,7 +7,8 @@ import cp.to4slpn.notifier.config.Config;
 import cp.to4slpn.notifier.config.ConfigLoader;
 import cp.to4slpn.notifier.monitor.ExamMonitor;
 import cp.to4slpn.notifier.notification.NotificationService;
-import cp.to4slpn.notifier.notification.impl.NotificationServiceImpl;
+import cp.to4slpn.notifier.notification.impl.DiscordNotificationServiceImpl;
+import cp.to4slpn.notifier.notification.impl.TextNotificationServiceImpl;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 
@@ -47,7 +48,14 @@ public final class Main {
             InfoCarClient infoCarClient = new InfoCarClient(httpClient, authClient);
 
             // initialize notification service
-            NotificationService notificationService = new NotificationServiceImpl();
+            NotificationService notificationService = null;
+            if (config.notification().discord()) {
+                notificationService = new DiscordNotificationServiceImpl(httpClient,
+                        config.notification().webhookUrl());
+            } else {
+                notificationService = new TextNotificationServiceImpl();
+            }
+
 
             // setup the exam monitoring logic
             ExamMonitor monitor = new ExamMonitor(

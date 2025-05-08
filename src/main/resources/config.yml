@@ -12,3 +12,7 @@ exam:
   startDate: "2025-05-08"
   endDate: "2025-06-29"
   examType: "practice"  # options: practice, theory, both
+
+notification:
+  discord: true
+  webhookUrl: "https://discord.com/api/webhooks/example-webhook-url"
